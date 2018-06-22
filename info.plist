@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>bundleid</key>
+	<string></string>
+	<key>category</key>
+	<string>Productivity</string>
+	<key>connections</key>
+	<dict>
+		<key>4D6B7936-1F3C-48CD-943C-000C91A0A6B5</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>B091FB16-E74D-4EC0-8079-5642FBC78D76</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+		<key>B091FB16-E74D-4EC0-8079-5642FBC78D76</key>
+		<array>
+			<dict>
+				<key>destinationuid</key>
+				<string>0421DB1D-160C-4422-B502-911288A7CC2C</string>
+				<key>modifiers</key>
+				<integer>0</integer>
+				<key>modifiersubtext</key>
+				<string></string>
+				<key>vitoclose</key>
+				<false/>
+			</dict>
+		</array>
+	</dict>
+	<key>createdby</key>
+	<string>SnowWalkerJ</string>
+	<key>description</key>
+	<string>Get CDN for js libraries from BootCDN</string>
+	<key>disabled</key>
+	<false/>
+	<key>name</key>
+	<string>BootCDN</string>
+	<key>objects</key>
+	<array>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>alfredfiltersresults</key>
+				<false/>
+				<key>alfredfiltersresultsmatchmode</key>
+				<integer>0</integer>
+				<key>argumenttrimmode</key>
+				<integer>0</integer>
+				<key>argumenttype</key>
+				<integer>0</integer>
+				<key>escaping</key>
+				<integer>68</integer>
+				<key>keyword</key>
+				<string>cdn</string>
+				<key>queuedelaycustom</key>
+				<integer>3</integer>
+				<key>queuedelayimmediatelyinitially</key>
+				<true/>
+				<key>queuedelaymode</key>
+				<integer>1</integer>
+				<key>queuemode</key>
+				<integer>1</integer>
+				<key>runningsubtext</key>
+				<string>Please wait</string>
+				<key>script</key>
+				<string>import sys
+from workflow import Workflow3, web, ICON_WEB
+
+API_URL = "https://api.bootcdn.cn/libraries/{}.min.json"
+
+
+def get_data(query):
+    url = API_URL.format(query)
+    return web.get(url).json()
+
+def make_scripts(name, package):
+    result = []
+    version = package['version']
+    for filename in package['files']:
+        if filename.endswith(".js"):
+            result.append('&lt;script src="https://cdn.bootcss.com/{name}/{version}/{filename}"&gt;&lt;/script&gt;'.format(name=name, version=version, filename=filename))
+        elif filename.endswith(".css"):
+            result.append('&lt;link href="https://cdn.bootcss.com/{name}/{version}/{filename}" rel="stylesheet"&gt;'.format(name=name, version=version, filename=filename))
+    return '\n'.join(result)
+
+
+def main(mf):
+    query = wf.args[0]
+    # sys.stdout.write("DEBUG:" + uri + "\n")
+    data = wf.cached_data(query, lambda: get_data(query), max_age=3600*24)
+    version = data['version']
+    title = "{name} {version}: {description}".format(**data)
+    arg = make_scripts(query, [p for p in data['assets'] if p['version']==version][0])
+    wf.add_item(title,
+        "Hit RET to Copy to Clipboard",
+        arg=arg,
+        valid=True,
+        icon=ICON_WEB,
+    )
+    for p in data['assets']:
+        if p['version'] == version:
+            continue
+        wf.add_item("{name} {version}".format(name=query, version=p['version']),
+            "Hit RET to Copy to Clipboard",
+            arg=make_scripts(query, p),
+            valid=True,
+            icon=ICON_WEB)
+    wf.send_feedback()
+
+
+if __name__ == '__main__':
+    wf = Workflow3(update_settings={
+        "github_slug": "LingyuanJi/math-kernel-toggle"
+    })
+    wf = Workflow3()
+    sys.exit(wf.run(main))
+</string>
+				<key>scriptargtype</key>
+				<integer>1</integer>
+				<key>scriptfile</key>
+				<string></string>
+				<key>subtext</key>
+				<string>Find on BootCDN</string>
+				<key>title</key>
+				<string>BootCDN</string>
+				<key>type</key>
+				<integer>3</integer>
+				<key>withspace</key>
+				<true/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.input.scriptfilter</string>
+			<key>uid</key>
+			<string>4D6B7936-1F3C-48CD-943C-000C91A0A6B5</string>
+			<key>version</key>
+			<integer>2</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>autopaste</key>
+				<true/>
+				<key>clipboardtext</key>
+				<string>{query}</string>
+				<key>transient</key>
+				<false/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.output.clipboard</string>
+			<key>uid</key>
+			<string>0421DB1D-160C-4422-B502-911288A7CC2C</string>
+			<key>version</key>
+			<integer>2</integer>
+		</dict>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>argument</key>
+				<string>{query}</string>
+				<key>variables</key>
+				<dict/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.utility.argument</string>
+			<key>uid</key>
+			<string>B091FB16-E74D-4EC0-8079-5642FBC78D76</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
+	</array>
+	<key>readme</key>
+	<string></string>
+	<key>uidata</key>
+	<dict>
+		<key>0421DB1D-160C-4422-B502-911288A7CC2C</key>
+		<dict>
+			<key>xpos</key>
+			<integer>500</integer>
+			<key>ypos</key>
+			<integer>140</integer>
+		</dict>
+		<key>4D6B7936-1F3C-48CD-943C-000C91A0A6B5</key>
+		<dict>
+			<key>xpos</key>
+			<integer>130</integer>
+			<key>ypos</key>
+			<integer>140</integer>
+		</dict>
+		<key>B091FB16-E74D-4EC0-8079-5642FBC78D76</key>
+		<dict>
+			<key>xpos</key>
+			<integer>340</integer>
+			<key>ypos</key>
+			<integer>170</integer>
+		</dict>
+	</dict>
+	<key>webaddress</key>
+	<string>https://www.github.com/SnowWalkerJ/Alfred-BootCDN</string>
+</dict>
+</plist>
