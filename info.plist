@@ -118,9 +118,13 @@ def main(mf):
 
 if __name__ == '__main__':
     wf = Workflow3(update_settings={
-        "github_slug": "LingyuanJi/math-kernel-toggle"
+        "github_slug": "SnowWalkerJ/Alfred-BootCDN"
     })
-    wf = Workflow3()
+    if wf.update_available:
+        wf.add_item('New version available',
+                    'Action this item to install the update',
+                    autocomplete='workflow:update',
+                    icon=ICON_INFO)
     sys.exit(wf.run(main))
 </string>
 				<key>scriptargtype</key>
