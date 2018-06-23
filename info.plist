@@ -85,6 +85,10 @@ def make_scripts(name, package):
     result = []
     version = package['version']
     for filename in package['files']:
+        parts = filename.split(".")
+        if parts[-2] != "min" and ".".join([parts[:-1], "min", parts[-1]]) in package['files']:
+            # There is a "min" version, skip the full version
+            continue
         if filename.endswith(".js"):
             result.append('&lt;script src="https://cdn.bootcss.com/{name}/{version}/{filename}"&gt;&lt;/script&gt;'.format(name=name, version=version, filename=filename))
         elif filename.endswith(".css"):
@@ -97,10 +101,10 @@ def main(mf):
     # sys.stdout.write("DEBUG:" + uri + "\n")
     data = wf.cached_data(query, lambda: get_data(query), max_age=3600*24)
     version = data['version']
-    title = "{name} {version}: {description}".format(**data)
+    title = "{name}: {description}".format(**data)
     arg = make_scripts(query, [p for p in data['assets'] if p['version']==version][0])
     wf.add_item(title,
-        "Hit RET to Copy to Clipboard",
+        version,
         arg=arg,
         valid=True,
         icon=ICON_WEB,
@@ -108,8 +112,8 @@ def main(mf):
     for p in data['assets']:
         if p['version'] == version:
             continue
-        wf.add_item("{name} {version}".format(name=query, version=p['version']),
-            "Hit RET to Copy to Clipboard",
+        wf.add_item(title,
+            p['version'],
             arg=make_scripts(query, p),
             valid=True,
             icon=ICON_WEB)
