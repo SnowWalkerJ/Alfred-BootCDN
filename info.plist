@@ -86,7 +86,7 @@ def make_scripts(name, package):
     version = package['version']
     for filename in package['files']:
         parts = filename.split(".")
-        if parts[-2] != "min" and ".".join([parts[:-1], "min", parts[-1]]) in package['files']:
+        if parts[-2] != "min" and ".".join([".".join(parts[:-1]), "min", parts[-1]]) in package['files']:
             # There is a "min" version, skip the full version
             continue
         if filename.endswith(".js"):
